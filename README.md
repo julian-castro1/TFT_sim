@@ -165,6 +165,62 @@ const TFT_COLORS = {
 4. **Interact with the display** using mouse clicks (simulating touch)
 5. **Use debug mode** to visualize touch zones and state transitions
 
+### Build for Production 🏗️
+
+1. **Generate an optimized build**
+   ```bash
+   npm run build
+   # or
+   yarn build
+   ```
+   The compiled assets will be output to the `dist/` directory.
+
+2. **Preview the production build locally**
+   ```bash
+   npm run preview
+   # or
+   yarn preview
+   ```
+   Open the printed URL (default: `http://localhost:4173`) to verify everything works as expected.
+
+### Running Tests 🧪
+
+Execute the full test suite:
+
+```bash
+npm test
+# or
+yarn test
+```
+
+Useful variations:
+
+```bash
+npm run test:watch      # Re-run tests on file changes
+npm run test:coverage   # Generate coverage report in coverage/
+```
+
+### Linting & Formatting 🧹
+
+```bash
+npm run lint     # ESLint static analysis
+npm run format   # Prettier auto-formatting
+```
+
+These scripts run automatically on staged files via **husky** + **lint-staged** to keep the codebase consistent.
+
+### Environment Variables ⚙️
+
+Runtime configuration can be customised via a `.env.local` file at the project root (this file is git-ignored):
+
+```dotenv
+VITE_APP_NAME="TFT Display Simulator"
+VITE_DEBUG_MODE=false   # enable verbose logs when true
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+All user-defined variables must be prefixed with `VITE_` to be exposed to the Vite build; see [Vite Env Variables](https://vitejs.dev/guide/env-and-mode.html) for details.
+
 ## 📁 Project Structure
 
 ```
