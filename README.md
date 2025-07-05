@@ -136,8 +136,8 @@ const TFT_COLORS = {
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/tft-display-simulator.git
-   cd tft-display-simulator
+   git clone https://github.com/julian-castro1/TFT_sim.git
+   cd TFT_sim
    ```
 
 2. **Install dependencies**
@@ -159,54 +159,68 @@ const TFT_COLORS = {
 
 ### Quick Start Example
 
-1. **Paste your Arduino code** into the code editor
+> **Note**: This project is currently in early development. The following steps describe the planned functionality:
+
+1. **Paste your Arduino code** into the code editor (to be implemented)
 2. **Configure display settings** (dimensions, rotation)
 3. **Click "Parse & Render"** to generate the simulation
 4. **Interact with the display** using mouse clicks (simulating touch)
 5. **Use debug mode** to visualize touch zones and state transitions
 
+### Current Status
+
+The project is currently in the setup phase. You can:
+- Explore the comprehensive documentation in the `docs/` directory
+- Review the planned architecture and features
+- Check the roadmap for development progress
+- Contribute to the project development
+
 ## 📁 Project Structure
 
 ```
-tft-display-simulator/
-├── src/
-│   ├── components/
-│   │   ├── DisplayCanvas.tsx      # Main display rendering component
-│   │   ├── CodeEditor.tsx         # Arduino code input interface
-│   │   ├── ControlPanel.tsx       # Configuration and debug controls
-│   │   └── TouchZoneOverlay.tsx   # Touch interaction visualization
-│   ├── parsers/
-│   │   ├── ArduinoParser.ts       # C++ code parsing logic
-│   │   ├── TFTCommandParser.ts    # TFT_eSPI command extraction
-│   │   └── StateAnalyzer.ts       # State transition analysis
-│   ├── renderers/
-│   │   ├── CanvasRenderer.ts      # Low-level canvas drawing
-│   │   ├── UIElementRenderer.ts   # UI component rendering
-│   │   └── FontRenderer.ts        # Text and font handling
-│   ├── state/
-│   │   ├── displayStore.ts        # Display state management
-│   │   ├── interactionStore.ts    # Touch/click handling
-│   │   └── codeStore.ts          # Parsed code state
-│   ├── utils/
+TFT_sim/
+├── src/                          # Source code (to be implemented)
+│   ├── components/               # React components
+│   │   ├── DisplayCanvas.tsx     # Main display rendering component
+│   │   ├── CodeEditor.tsx        # Arduino code input interface
+│   │   ├── ControlPanel.tsx      # Configuration and debug controls
+│   │   └── TouchZoneOverlay.tsx  # Touch interaction visualization
+│   ├── parsers/                  # Code parsing logic
+│   │   ├── ArduinoParser.ts      # C++ code parsing logic
+│   │   ├── TFTCommandParser.ts   # TFT_eSPI command extraction
+│   │   └── StateAnalyzer.ts      # State transition analysis
+│   ├── renderers/                # Rendering system
+│   │   ├── CanvasRenderer.ts     # Low-level canvas drawing
+│   │   ├── UIElementRenderer.ts  # UI component rendering
+│   │   └── FontRenderer.ts       # Text and font handling
+│   ├── state/                    # State management
+│   │   ├── displayStore.ts       # Display state management
+│   │   ├── interactionStore.ts   # Touch/click handling
+│   │   └── codeStore.ts         # Parsed code state
+│   ├── utils/                    # Utility functions
 │   │   ├── colorUtils.ts         # Color conversion utilities
 │   │   ├── mathUtils.ts          # Coordinate calculations
 │   │   └── validationUtils.ts    # Code validation helpers
-│   └── types/
+│   └── types/                    # TypeScript type definitions
 │       ├── DisplayTypes.ts       # Display-related interfaces
 │       ├── InteractionTypes.ts   # Touch/interaction types
 │       └── ParserTypes.ts        # Code parsing types
-├── public/
+├── public/                       # Static assets
 │   ├── fonts/                    # Font files for rendering
 │   ├── icons/                    # UI icons and assets
 │   └── samples/                  # Example Arduino code files
-├── docs/
+├── docs/                         # Documentation
 │   ├── API.md                    # API documentation
+│   ├── ARCHITECTURE.md           # Architecture documentation
 │   ├── CONTRIBUTING.md           # Contribution guidelines
 │   └── EXAMPLES.md               # Usage examples
-└── tests/
-    ├── parsers/                  # Parser unit tests
-    ├── renderers/                # Renderer unit tests
-    └── integration/              # End-to-end tests
+├── tests/                        # Test files (to be implemented)
+│   ├── parsers/                  # Parser unit tests
+│   ├── renderers/                # Renderer unit tests
+│   └── integration/              # End-to-end tests
+├── package.json                  # Project configuration
+├── vite.config.ts               # Vite configuration
+└── README.md                    # This file
 ```
 
 ## 🎨 Usage Examples
@@ -379,36 +393,51 @@ We welcome contributions! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for
 
 ## 📝 Roadmap
 
-### Phase 1: Core Functionality ✅
-- [x] Basic code parsing
-- [x] Simple shape rendering
-- [x] Touch zone detection
-- [x] State management
+### Phase 1: Project Setup & Foundation 🚧
+- [x] Project structure and configuration
+- [x] TypeScript and build system setup
+- [x] Documentation framework
+- [ ] Basic React components
+- [ ] Initial code parsing framework
 
-### Phase 2: Advanced Features 🚧
+### Phase 2: Core Functionality 📋
+- [ ] Arduino code parser implementation
+- [ ] TFT_eSPI command interpreter
+- [ ] Canvas rendering system
+- [ ] Basic shape drawing (rectangles, circles)
+- [ ] Touch zone detection and mapping
+
+### Phase 3: Advanced Display Features �
 - [ ] Font rendering system
 - [ ] Bitmap/icon support
+- [ ] Color system and RGB565 conversion
 - [ ] Animation system
 - [ ] Multi-screen support
 
-### Phase 3: Developer Tools 📋
-- [ ] Code validation
+### Phase 4: Developer Tools �
+- [ ] Code validation and syntax checking
 - [ ] Performance profiling
+- [ ] Debug mode and visualization
 - [ ] Export functionality
 - [ ] Plugin system
 
-### Phase 4: Integration 🔮
+### Phase 5: Integration & Deployment 🔮
 - [ ] VS Code extension
 - [ ] CLI interface
-- [ ] Hardware integration
-- [ ] Cloud deployment
+- [ ] Hardware integration testing
+- [ ] Cloud deployment options
 
 ## 🐛 Known Issues
 
-1. **Font Rendering**: Currently limited to web fonts, working on TFT font support
-2. **Bitmap Support**: Basic bitmap rendering implemented, improving compression
-3. **Touch Calibration**: Calibration data not yet fully implemented
-4. **Performance**: Large displays may have rendering performance issues
+Since this project is in early development, the following are planned implementations:
+
+1. **Core Implementation**: Main components and parsers are not yet implemented
+2. **Font Rendering**: TFT font support system needs to be developed
+3. **Bitmap Support**: Image and icon rendering system needs implementation
+4. **Touch Calibration**: Touch coordinate mapping system needs development
+5. **Performance**: Rendering optimization will be addressed in later phases
+
+Please check the roadmap above for current development status.
 
 ## 📄 License
 
@@ -423,9 +452,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/yourusername/tft-display-simulator/issues)
-- **Discussions**: [Ask questions and share ideas](https://github.com/yourusername/tft-display-simulator/discussions)
-- **Email**: your.email@example.com
+- **GitHub Issues**: [Report bugs or request features](https://github.com/julian-castro1/TFT_sim/issues)
+- **Discussions**: [Ask questions and share ideas](https://github.com/julian-castro1/TFT_sim/discussions)
+- **Documentation**: Check the `docs/` directory for detailed guides
 
 ---
 
