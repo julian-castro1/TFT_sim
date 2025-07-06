@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDisplayStore } from '../stores/displayStore'
-import { Settings, Eye, EyeOff, RotateCw, Palette, Monitor } from 'lucide-react'
+import { Settings, Eye, EyeOff, RotateCw, Monitor } from 'lucide-react'
 import './ControlPanel.css'
 
 export const ControlPanel: React.FC = () => {

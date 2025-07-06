@@ -28,7 +28,7 @@ interface DisplayStore extends DisplayState {
   setDimensions: (width: number, height: number) => void
 }
 
-export const useDisplayStore = create<DisplayStore>((set, get) => ({
+export const useDisplayStore = create<DisplayStore>((set) => ({
   // Initial state
   elements: [],
   backgroundColor: '#000000',

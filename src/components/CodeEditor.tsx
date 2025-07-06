@@ -9,7 +9,6 @@ export const CodeEditor: React.FC = () => {
   const { 
     code, 
     setCode, 
-    parsedDisplay, 
     setParsedDisplay,
     errors, 
     setErrors,
@@ -18,7 +17,7 @@ export const CodeEditor: React.FC = () => {
     loadSample
   } = useCodeStore()
   
-  const { setElements, setTouchZones, clearDisplay } = useDisplayStore()
+  const { setElements, setTouchZones, clearDisplay, width, height } = useDisplayStore()
   const [isExpanded, setIsExpanded] = useState(false)
   
   // Handle code change
@@ -32,7 +31,7 @@ export const CodeEditor: React.FC = () => {
     setErrors([])
     
     try {
-      const result = await parseArduinoCode(code)
+      const result = await parseArduinoCode(code, width, height)
       setParsedDisplay(result)
       
       if (result.errors.length > 0) {
@@ -55,7 +54,7 @@ export const CodeEditor: React.FC = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [code, setParsedDisplay, setErrors, setIsLoading, setElements, setTouchZones])
+  }, [code, width, height, setParsedDisplay, setErrors, setIsLoading, setElements, setTouchZones])
   
   // Clear display
   const handleClearDisplay = useCallback(() => {
@@ -64,9 +63,13 @@ export const CodeEditor: React.FC = () => {
   }, [clearDisplay, setErrors])
   
   // Load sample code
-  const handleLoadSample = useCallback((sampleName: string) => {
+  const handleLoadSample = useCallback(async (sampleName: string) => {
     loadSample(sampleName)
-  }, [loadSample])
+    // Automatically parse the loaded sample after a short delay to allow state update
+    setTimeout(() => {
+      handleParseCode()
+    }, 100)
+  }, [loadSample, handleParseCode])
   
   return (
     <div className="code-editor">

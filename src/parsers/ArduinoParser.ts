@@ -1,10 +1,10 @@
-import { ParsedDisplay, ParseError, Screen, StateDefinition } from '../types/ParserTypes'
+import { ParsedDisplay, Screen, StateDefinition } from '../types/ParserTypes'
 import { UIElement } from '../types/DisplayTypes'
 import { TouchZone } from '../types/InteractionTypes'
 import { parseArduinoColor } from '../utils/colorUtils'
 
 // Main parser function
-export async function parseArduinoCode(code: string): Promise<ParsedDisplay> {
+export async function parseArduinoCode(code: string, displayWidth: number = 380, displayHeight: number = 420): Promise<ParsedDisplay> {
   const result: ParsedDisplay = {
     screens: [],
     states: [],
@@ -31,7 +31,7 @@ export async function parseArduinoCode(code: string): Promise<ParsedDisplay> {
     result.functions = extractFunctions(lines)
     
     // Extract screens from drawing functions
-    result.screens = extractScreens(lines, result.functions)
+    result.screens = extractScreens(lines, result.functions, displayWidth, displayHeight)
     
     // Validate the parsed result
     validateParsedDisplay(result)
@@ -66,7 +66,7 @@ function extractIncludes(lines: string[]): string[] {
 function extractStates(lines: string[]): StateDefinition[] {
   const states: StateDefinition[] = []
   
-  lines.forEach((line, index) => {
+  lines.forEach((line) => {
     // Extract enum definitions
     const enumMatch = line.match(/enum\s+(\w+)\s*\{([^}]+)\}/)
     if (enumMatch) {
@@ -141,7 +141,7 @@ function extractFunctions(lines: string[]): any[] {
 }
 
 // Extract screens from drawing functions
-function extractScreens(lines: string[], functions: any[]): Screen[] {
+function extractScreens(lines: string[], functions: any[], displayWidth: number, displayHeight: number): Screen[] {
   const screens: Screen[] = []
   
   // Find drawing functions (functions that start with "draw")
@@ -158,7 +158,7 @@ function extractScreens(lines: string[], functions: any[]): Screen[] {
     }
     
     // Extract UI elements from function body
-    const { elements, touchZones } = extractUIElementsFromFunction(lines, func.name)
+    const { elements, touchZones } = extractUIElementsFromFunction(lines, func.name, displayWidth, displayHeight)
     screen.elements = elements
     screen.touchZones = touchZones
     
@@ -167,7 +167,7 @@ function extractScreens(lines: string[], functions: any[]): Screen[] {
   
   // If no drawing functions found, create a default screen
   if (screens.length === 0) {
-    const { elements, touchZones } = extractUIElementsFromFunction(lines, 'main')
+    const { elements, touchZones } = extractUIElementsFromFunction(lines, 'main', displayWidth, displayHeight)
     screens.push({
       id: 'main',
       name: 'Main Screen',
@@ -182,7 +182,7 @@ function extractScreens(lines: string[], functions: any[]): Screen[] {
 }
 
 // Extract UI elements from function body
-function extractUIElementsFromFunction(lines: string[], functionName: string): { elements: UIElement[], touchZones: TouchZone[] } {
+function extractUIElementsFromFunction(lines: string[], functionName: string, displayWidth: number, displayHeight: number): { elements: UIElement[], touchZones: TouchZone[] } {
   const elements: UIElement[] = []
   const touchZones: TouchZone[] = []
   let inFunction = false
@@ -212,7 +212,7 @@ function extractUIElementsFromFunction(lines: string[], functionName: string): {
     
     // Extract TFT commands
     if (trimmedLine.includes('tft.')) {
-      const element = parseTFTCommand(trimmedLine, elementId++, index + 1)
+      const element = parseTFTCommand(trimmedLine, elementId++, displayWidth, displayHeight)
       if (element) {
         elements.push(element)
       }
@@ -231,20 +231,21 @@ function extractUIElementsFromFunction(lines: string[], functionName: string): {
 }
 
 // Parse individual TFT commands
-function parseTFTCommand(line: string, id: number, lineNumber: number): UIElement | null {
+function parseTFTCommand(line: string, id: number, displayWidth: number, displayHeight: number): UIElement | null {
   const trimmedLine = line.trim()
   
   // fillScreen
   if (trimmedLine.includes('fillScreen')) {
     const colorMatch = trimmedLine.match(/fillScreen\s*\(\s*([^)]+)\s*\)/)
     if (colorMatch) {
+      // Use the actual display dimensions for fillScreen
       return {
         id: `bg_${id}`,
         type: 'rectangle',
         x: 0,
         y: 0,
-        width: 380,
-        height: 420,
+        width: displayWidth,
+        height: displayHeight,
         color: parseArduinoColor(colorMatch[1]),
         backgroundColor: parseArduinoColor(colorMatch[1]),
         visible: true,
