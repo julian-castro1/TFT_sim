@@ -19,7 +19,8 @@
       "@stores/*": ["src/stores/*"],
       "@utils/*": ["src/utils/*"],
       "@types/*": ["src/types/*"]
-    }
+    },
+    "allowJs": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
