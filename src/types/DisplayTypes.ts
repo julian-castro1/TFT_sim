@@ -35,7 +35,7 @@ export interface TFTColors {
 // UI element types
 export interface UIElement {
   id: string
-  type: 'rectangle' | 'roundedRectangle' | 'circle' | 'text' | 'bitmap'
+  type: 'rectangle' | 'roundedRectangle' | 'circle' | 'text' | 'bitmap' | 'line'
   x: number
   y: number
   width?: number
@@ -50,6 +50,10 @@ export interface UIElement {
   textBaseline?: 'top' | 'middle' | 'bottom'
   visible: boolean
   zIndex: number
+  // Line specific properties
+  x2?: number
+  y2?: number
+  strokeWidth?: number
 }
 
 // Display state interface

@@ -1,5 +1,6 @@
 import { TouchZone, TouchResult } from '../types/InteractionTypes'
 import { useDisplayStore } from '../stores/displayStore'
+import { useCodeStore } from '../stores/codeStore'
 
 // Handle canvas click/touch events
 export function handleCanvasClick(x: number, y: number, touchZones: TouchZone[]): TouchResult {
@@ -33,35 +34,93 @@ function isPointInZone(x: number, y: number, zone: TouchZone): boolean {
 
 // Execute touch action
 function executeTouchAction(zone: TouchZone): void {
-  const { setCurrentScreen } = useDisplayStore.getState()
+  const { setCurrentScreen, setElements, setTouchZones, setBackgroundColor } = useDisplayStore.getState()
+  const { parsedDisplay } = useCodeStore.getState()
   
   console.log(`Touch action: ${zone.action}`, zone)
   
-  // Handle different action types
+  // If we have a targetState, try to switch to that screen
+  if (zone.targetState && parsedDisplay) {
+    const targetStateStr = zone.targetState // Store in a variable we know is defined
+    // Find the screen matching the target state
+    const targetScreen = parsedDisplay.screens.find(screen => 
+      screen.id.toLowerCase() === targetStateStr.toLowerCase() ||
+      screen.name.toLowerCase() === targetStateStr.toLowerCase() ||
+      screen.id === `draw${targetStateStr}` ||
+      screen.id === `draw${targetStateStr.charAt(0).toUpperCase() + targetStateStr.slice(1)}`
+    )
+    
+    if (targetScreen) {
+      // Switch to the target screen
+      setCurrentScreen(targetScreen.id)
+      setElements(targetScreen.elements)
+      setTouchZones(targetScreen.touchZones)
+      
+      // Update background color if needed
+      const bgElement = targetScreen.elements.find(el => el.id.startsWith('bg_'))
+      if (bgElement && bgElement.backgroundColor) {
+        setBackgroundColor(bgElement.backgroundColor)
+      }
+      
+      return
+    }
+  }
+  
+  // Fallback to the old behavior for compatibility
   switch (zone.action.toLowerCase()) {
     case 'home':
-      setCurrentScreen('home')
+      switchToScreen('home')
       break
     case 'config':
     case 'configuration':
-      setCurrentScreen('config')
+      switchToScreen('config')
       break
     case 'back':
-      setCurrentScreen('home')
+      switchToScreen('home')
       break
     case 'menu':
-      setCurrentScreen('menu')
+      switchToScreen('menu')
       break
     case 'settings':
-      setCurrentScreen('settings')
+      switchToScreen('settings')
       break
     default:
       // For other actions, try to set the screen to the action name
-      if (zone.targetState) {
-        setCurrentScreen(zone.targetState)
-      } else {
-        setCurrentScreen(zone.action)
-      }
+      switchToScreen(zone.action)
+  }
+}
+
+// Helper function to switch screens
+function switchToScreen(screenName: string): void {
+  const { setCurrentScreen, setElements, setTouchZones, setBackgroundColor } = useDisplayStore.getState()
+  const { parsedDisplay } = useCodeStore.getState()
+  
+  if (!parsedDisplay) {
+    setCurrentScreen(screenName)
+    return
+  }
+  
+  // Find the matching screen
+  const targetScreen = parsedDisplay.screens.find(screen => 
+    screen.id.toLowerCase() === screenName.toLowerCase() ||
+    screen.name.toLowerCase() === screenName.toLowerCase() ||
+    screen.id === `draw${screenName}` ||
+    screen.id === `draw${screenName.charAt(0).toUpperCase() + screenName.slice(1)}`
+  )
+  
+  if (targetScreen) {
+    setCurrentScreen(targetScreen.id)
+    setElements(targetScreen.elements)
+    setTouchZones(targetScreen.touchZones)
+    
+    // Update background color if needed
+    const bgElement = targetScreen.elements.find(el => el.id.startsWith('bg_'))
+    if (bgElement && bgElement.backgroundColor) {
+      setBackgroundColor(bgElement.backgroundColor)
+    }
+  } else {
+    // Just update the screen name without changing elements
+    setCurrentScreen(screenName)
   }
 }
 

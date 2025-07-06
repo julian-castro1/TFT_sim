@@ -18,7 +18,7 @@ export const CodeEditor: React.FC = () => {
     loadSample
   } = useCodeStore()
   
-  const { setElements, setTouchZones, clearDisplay } = useDisplayStore()
+  const { setElements, setTouchZones, clearDisplay, setCurrentScreen, setBackgroundColor, setRotation, setDimensions } = useDisplayStore()
   const [isExpanded, setIsExpanded] = useState(false)
   
   // Handle code change
@@ -38,12 +38,28 @@ export const CodeEditor: React.FC = () => {
       if (result.errors.length > 0) {
         setErrors(result.errors)
       } else {
-        // Extract elements and touch zones from parsed display
-        const allElements = result.screens.flatMap(screen => screen.elements)
-        const allTouchZones = result.screens.flatMap(screen => screen.touchZones)
+        // Clear existing display first
+        clearDisplay()
         
-        setElements(allElements)
-        setTouchZones(allTouchZones)
+        // Apply display configuration if available
+        if (result.displayConfig) {
+          setRotation(result.displayConfig.rotation)
+          setDimensions(result.displayConfig.width, result.displayConfig.height)
+        }
+        
+        // If we have screens, show the first one (usually "home" or "main")
+        if (result.screens.length > 0) {
+          const firstScreen = result.screens[0]
+          setElements(firstScreen.elements)
+          setTouchZones(firstScreen.touchZones)
+          setCurrentScreen(firstScreen.id)
+          
+          // If the screen has a background color element, use it
+          const bgElement = firstScreen.elements.find(el => el.id.startsWith('bg_'))
+          if (bgElement && bgElement.backgroundColor) {
+            setBackgroundColor(bgElement.backgroundColor)
+          }
+        }
       }
     } catch (error) {
       setErrors([{
@@ -55,7 +71,7 @@ export const CodeEditor: React.FC = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [code, setParsedDisplay, setErrors, setIsLoading, setElements, setTouchZones])
+  }, [code, setParsedDisplay, setErrors, setIsLoading, setElements, setTouchZones, clearDisplay, setCurrentScreen, setBackgroundColor, setRotation, setDimensions])
   
   // Clear display
   const handleClearDisplay = useCallback(() => {

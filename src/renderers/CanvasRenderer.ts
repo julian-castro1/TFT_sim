@@ -58,6 +58,9 @@ function renderElement(ctx: CanvasRenderingContext2D, element: UIElement): void 
       case 'bitmap':
         renderBitmap(ctx, element)
         break
+      case 'line':
+        renderLine(ctx, element)
+        break
     }
   } catch (error) {
     console.error('Error rendering element:', element, error)
@@ -117,7 +120,7 @@ function renderCircle(ctx: CanvasRenderingContext2D, element: UIElement): void {
   ctx.beginPath()
   ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI)
   
-  if (element.backgroundColor) {
+  if (element.backgroundColor && element.backgroundColor !== 'transparent') {
     ctx.fillStyle = element.backgroundColor
     ctx.fill()
   }
@@ -126,6 +129,25 @@ function renderCircle(ctx: CanvasRenderingContext2D, element: UIElement): void {
     ctx.strokeStyle = element.color
     ctx.stroke()
   }
+}
+
+// Render line
+function renderLine(ctx: CanvasRenderingContext2D, element: UIElement): void {
+  if (element.x2 === undefined || element.y2 === undefined) return
+  
+  ctx.beginPath()
+  ctx.moveTo(element.x, element.y)
+  ctx.lineTo(element.x2, element.y2)
+  
+  if (element.color) {
+    ctx.strokeStyle = element.color
+  }
+  
+  if (element.strokeWidth) {
+    ctx.lineWidth = element.strokeWidth
+  }
+  
+  ctx.stroke()
 }
 
 // Render text

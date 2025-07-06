@@ -11,12 +11,20 @@ export async function parseArduinoCode(code: string): Promise<ParsedDisplay> {
     variables: [],
     functions: [],
     includes: [],
-    errors: []
+    errors: [],
+    displayConfig: {
+      rotation: 0,
+      width: 380,
+      height: 420
+    }
   }
 
   try {
     // Split code into lines for processing
     const lines = code.split('\n')
+    
+    // Extract display configuration
+    extractDisplayConfig(lines, result)
     
     // Extract includes
     result.includes = extractIncludes(lines)
@@ -46,6 +54,33 @@ export async function parseArduinoCode(code: string): Promise<ParsedDisplay> {
   }
 
   return result
+}
+
+// Extract display configuration
+function extractDisplayConfig(lines: string[], result: ParsedDisplay): void {
+  lines.forEach(line => {
+    const trimmedLine = line.trim()
+    
+    // Extract setRotation
+    if (trimmedLine.includes('setRotation')) {
+      const rotationMatch = trimmedLine.match(/setRotation\s*\(\s*(\d+)\s*\)/)
+      if (rotationMatch && result.displayConfig) {
+        const rotation = parseInt(rotationMatch[1])
+        result.displayConfig.rotation = rotation
+        
+        // Adjust dimensions based on rotation
+        if (rotation === 1 || rotation === 3) {
+          // Landscape mode
+          result.displayConfig.width = 420
+          result.displayConfig.height = 380
+        } else {
+          // Portrait mode
+          result.displayConfig.width = 380
+          result.displayConfig.height = 420
+        }
+      }
+    }
+  })
 }
 
 // Extract #include statements
@@ -188,6 +223,9 @@ function extractUIElementsFromFunction(lines: string[], functionName: string): {
   let inFunction = false
   let braceCount = 0
   let elementId = 0
+  let currentTextColor = '#ffffff' // Track current text color
+  let currentFont = 'Arial' // Track current font
+  let currentFontSize = 16 // Track current font size
   
   lines.forEach((line, index) => {
     const trimmedLine = line.trim()
@@ -210,9 +248,46 @@ function extractUIElementsFromFunction(lines: string[], functionName: string): {
       return
     }
     
+    // Extract setTextColor commands
+    if (trimmedLine.includes('setTextColor')) {
+      const colorMatch = trimmedLine.match(/setTextColor\s*\(\s*([^)]+)\s*\)/)
+      if (colorMatch) {
+        currentTextColor = parseArduinoColor(colorMatch[1])
+      }
+    }
+    
+    // Extract setFreeFont commands
+    if (trimmedLine.includes('setFreeFont')) {
+      const fontMatch = trimmedLine.match(/setFreeFont\s*\(\s*[&]?(\w+)\s*\)/)
+      if (fontMatch) {
+        const fontName = fontMatch[1]
+        // Extract font size from font name (e.g., FreeSansBold24pt7b -> 24)
+        const sizeMatch = fontName.match(/(\d+)pt/)
+        if (sizeMatch) {
+          currentFontSize = parseInt(sizeMatch[1])
+        }
+        // Extract font family
+        if (fontName.includes('FreeSans')) {
+          currentFont = 'Arial, sans-serif'
+        } else if (fontName.includes('FreeSerif')) {
+          currentFont = 'Georgia, serif'
+        } else if (fontName.includes('FreeMono')) {
+          currentFont = 'Courier New, monospace'
+        }
+      }
+    }
+    
+    // Extract setTextSize commands
+    if (trimmedLine.includes('setTextSize')) {
+      const sizeMatch = trimmedLine.match(/setTextSize\s*\(\s*(\d+)\s*\)/)
+      if (sizeMatch) {
+        currentFontSize = parseInt(sizeMatch[1]) * 8 // TFT_eSPI uses a multiplier
+      }
+    }
+    
     // Extract TFT commands
     if (trimmedLine.includes('tft.')) {
-      const element = parseTFTCommand(trimmedLine, elementId++, index + 1)
+      const element = parseTFTCommand(trimmedLine, elementId++, index + 1, currentTextColor, currentFont, currentFontSize)
       if (element) {
         elements.push(element)
       }
@@ -231,7 +306,7 @@ function extractUIElementsFromFunction(lines: string[], functionName: string): {
 }
 
 // Parse individual TFT commands
-function parseTFTCommand(line: string, id: number, lineNumber: number): UIElement | null {
+function parseTFTCommand(line: string, id: number, lineNumber: number, currentTextColor: string, currentFont: string, currentFontSize: number): UIElement | null {
   const trimmedLine = line.trim()
   
   // fillScreen
@@ -243,10 +318,10 @@ function parseTFTCommand(line: string, id: number, lineNumber: number): UIElemen
         type: 'rectangle',
         x: 0,
         y: 0,
-        width: 380,
-        height: 420,
-        color: parseArduinoColor(colorMatch[1]),
-        backgroundColor: parseArduinoColor(colorMatch[1]),
+        width: 480, // Use maximum possible width
+        height: 480, // Use maximum possible height
+        color: parseArduinoColor(colorMatch[1].trim()),
+        backgroundColor: parseArduinoColor(colorMatch[1].trim()),
         visible: true,
         zIndex: 0
       }
@@ -266,6 +341,26 @@ function parseTFTCommand(line: string, id: number, lineNumber: number): UIElemen
         height: parseInt(rectMatch[4]),
         color: parseArduinoColor(rectMatch[5]),
         backgroundColor: parseArduinoColor(rectMatch[5]),
+        visible: true,
+        zIndex: 1
+      }
+    }
+  }
+  
+  // fillRoundRect
+  if (trimmedLine.includes('fillRoundRect')) {
+    const roundRectMatch = trimmedLine.match(/fillRoundRect\s*\(\s*([^,]+),\s*([^,]+),\s*([^,]+),\s*([^,]+),\s*([^,]+),\s*([^)]+)\s*\)/)
+    if (roundRectMatch) {
+      return {
+        id: `roundrect_${id}`,
+        type: 'roundedRectangle',
+        x: parseInt(roundRectMatch[1]),
+        y: parseInt(roundRectMatch[2]),
+        width: parseInt(roundRectMatch[3]),
+        height: parseInt(roundRectMatch[4]),
+        radius: parseInt(roundRectMatch[5]),
+        color: parseArduinoColor(roundRectMatch[6]),
+        backgroundColor: parseArduinoColor(roundRectMatch[6]),
         visible: true,
         zIndex: 1
       }
@@ -302,11 +397,77 @@ function parseTFTCommand(line: string, id: number, lineNumber: number): UIElemen
         x: parseInt(stringMatch[2]),
         y: parseInt(stringMatch[3]),
         text: stringMatch[1],
-        color: '#ffffff', // Default color, could be extracted from setTextColor
+        color: currentTextColor,
         visible: true,
         zIndex: 2,
-        fontSize: 16,
-        textAlign: 'center'
+        fontSize: currentFontSize,
+        textAlign: 'center',
+        font: currentFont
+      }
+    }
+  }
+  
+  // fillCircle
+  if (trimmedLine.includes('fillCircle')) {
+    const circleMatch = trimmedLine.match(/fillCircle\s*\(\s*([^,]+),\s*([^,]+),\s*([^,]+),\s*([^)]+)\s*\)/)
+    if (circleMatch) {
+      const centerX = parseInt(circleMatch[1])
+      const centerY = parseInt(circleMatch[2])
+      const radius = parseInt(circleMatch[3])
+      return {
+        id: `circle_${id}`,
+        type: 'circle',
+        x: centerX - radius,
+        y: centerY - radius,
+        width: radius * 2,
+        height: radius * 2,
+        radius: radius,
+        color: parseArduinoColor(circleMatch[4]),
+        backgroundColor: parseArduinoColor(circleMatch[4]),
+        visible: true,
+        zIndex: 1
+      }
+    }
+  }
+  
+  // drawCircle
+  if (trimmedLine.includes('drawCircle')) {
+    const circleMatch = trimmedLine.match(/drawCircle\s*\(\s*([^,]+),\s*([^,]+),\s*([^,]+),\s*([^)]+)\s*\)/)
+    if (circleMatch) {
+      const centerX = parseInt(circleMatch[1])
+      const centerY = parseInt(circleMatch[2])
+      const radius = parseInt(circleMatch[3])
+      return {
+        id: `circle_${id}`,
+        type: 'circle',
+        x: centerX - radius,
+        y: centerY - radius,
+        width: radius * 2,
+        height: radius * 2,
+        radius: radius,
+        color: parseArduinoColor(circleMatch[4]),
+        backgroundColor: 'transparent',
+        visible: true,
+        zIndex: 1
+      }
+    }
+  }
+  
+  // drawLine
+  if (trimmedLine.includes('drawLine')) {
+    const lineMatch = trimmedLine.match(/drawLine\s*\(\s*([^,]+),\s*([^,]+),\s*([^,]+),\s*([^,]+),\s*([^)]+)\s*\)/)
+    if (lineMatch) {
+      return {
+        id: `line_${id}`,
+        type: 'line',
+        x: parseInt(lineMatch[1]),
+        y: parseInt(lineMatch[2]),
+        x2: parseInt(lineMatch[3]),
+        y2: parseInt(lineMatch[4]),
+        color: parseArduinoColor(lineMatch[5]),
+        visible: true,
+        zIndex: 1,
+        strokeWidth: 1
       }
     }
   }
@@ -326,14 +487,33 @@ function parseTouchZone(line: string, lines: string[], lineIndex: number): Touch
     
     // Try to find the action by looking at the next few lines
     let action = 'touch'
-    for (let i = lineIndex + 1; i < Math.min(lineIndex + 5, lines.length); i++) {
+    let targetState = ''
+    for (let i = lineIndex + 1; i < Math.min(lineIndex + 10, lines.length); i++) {
       const nextLine = lines[i].trim()
-      if (nextLine.includes('=')) {
+      
+      // Look for state assignments
+      if (nextLine.includes('=') && (nextLine.includes('State') || nextLine.includes('state') || nextLine.includes('curState') || nextLine.includes('currentState'))) {
         const actionMatch = nextLine.match(/(\w+)\s*=\s*(\w+)/)
         if (actionMatch) {
-          action = actionMatch[2]
+          targetState = actionMatch[2]
+          action = targetState.toLowerCase()
           break
         }
+      }
+      
+      // Also look for function calls that might indicate actions
+      if (nextLine.includes('draw') || nextLine.includes('show') || nextLine.includes('display')) {
+        const funcMatch = nextLine.match(/(draw|show|display)(\w+)/)
+        if (funcMatch) {
+          action = funcMatch[2].toLowerCase()
+          targetState = action
+          break
+        }
+      }
+      
+      // Break if we hit another condition or closing brace
+      if (nextLine.includes('}') || nextLine.includes('else') || nextLine.includes('if')) {
+        break
       }
     }
     
@@ -344,6 +524,7 @@ function parseTouchZone(line: string, lines: string[], lineIndex: number): Touch
       width: x2 - x,
       height: y2 - y,
       action: action,
+      targetState: targetState,
       visible: true,
       debugColor: '#ff0000'
     }

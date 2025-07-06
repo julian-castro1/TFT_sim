@@ -23,12 +23,16 @@ export const ControlPanel: React.FC = () => {
   } = useDisplayStore()
 
   const handleRotationChange = (newRotation: number) => {
+    const oldRotation = rotation
     setRotation(newRotation)
-    // Swap dimensions for 90 and 270 degree rotations
-    if ((newRotation === 1 || newRotation === 3) && width === 380) {
-      setDimensions(420, 380)
-    } else if ((newRotation === 0 || newRotation === 2) && width === 420) {
-      setDimensions(380, 420)
+    
+    // Determine if we need to swap dimensions
+    const oldIsPortrait = oldRotation === 0 || oldRotation === 2
+    const newIsPortrait = newRotation === 0 || newRotation === 2
+    
+    // If orientation changed, swap dimensions
+    if (oldIsPortrait !== newIsPortrait) {
+      setDimensions(height, width)
     }
   }
 

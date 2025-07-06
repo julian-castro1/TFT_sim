@@ -18,6 +18,11 @@ export interface ParsedDisplay {
   functions: Function[]
   includes: string[]
   errors: ParseError[]
+  displayConfig?: {
+    rotation: number
+    width: number
+    height: number
+  }
 }
 
 // Screen definition

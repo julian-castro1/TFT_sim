@@ -10,7 +10,9 @@ export const TFT_COLORS = {
   TFT_YELLOW: 0xFFE0,
   TFT_ORANGE: 0xFD20,
   TFT_DARKGREY: 0x7BEF,
+  TFT_DARKGRAY: 0x7BEF, // Alternative spelling
   TFT_LIGHTGREY: 0xC618,
+  TFT_LIGHTGRAY: 0xC618, // Alternative spelling
   TFT_NAVY: 0x000F,
   TFT_DARKGREEN: 0x03E0,
   TFT_DARKCYAN: 0x03EF,
@@ -19,6 +21,11 @@ export const TFT_COLORS = {
   TFT_OLIVE: 0x7BE0,
   TFT_PINK: 0xF81F,
   TFT_GREENYELLOW: 0xAFE5,
+  TFT_BROWN: 0xBC40,
+  TFT_GOLD: 0xFEA0,
+  TFT_SILVER: 0xC618,
+  TFT_SKYBLUE: 0x867D,
+  TFT_VIOLET: 0x915C,
 } as const
 
 // Convert RGB565 to hex color string
