@@ -43,8 +43,8 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor': ['react', 'react-dom'],
-          'parsers': ['src/parsers/ArduinoParser', 'src/parsers/TFTCommandParser'],
-          'renderers': ['src/renderers/CanvasRenderer', 'src/renderers/UIElementRenderer'],
+          'parsers': ['src/parsers/ArduinoParser'],
+          'renderers': ['src/renderers/CanvasRenderer'],
         },
       },
     },

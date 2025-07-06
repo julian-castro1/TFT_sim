@@ -1,0 +1,24 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useDisplayStore } from '../stores/displayStore';
+import { Settings, Eye, EyeOff, RotateCw, Monitor } from 'lucide-react';
+import './ControlPanel.css';
+export const ControlPanel = () => {
+    const { debugMode, setDebugMode, showTouchZones, setShowTouchZones, rotation, setRotation, width, height, setDimensions, backgroundColor, setBackgroundColor, animationSpeed, setAnimationSpeed, elements, touchZones } = useDisplayStore();
+    const handleRotationChange = (newRotation) => {
+        setRotation(newRotation);
+        // Swap dimensions for 90 and 270 degree rotations
+        if ((newRotation === 1 || newRotation === 3) && width === 380) {
+            setDimensions(420, 380);
+        }
+        else if ((newRotation === 0 || newRotation === 2) && width === 420) {
+            setDimensions(380, 420);
+        }
+    };
+    const handleDimensionsChange = (newWidth, newHeight) => {
+        setDimensions(newWidth, newHeight);
+    };
+    return (_jsxs("div", { className: "control-panel", children: [_jsxs("div", { className: "control-panel-header", children: [_jsx(Settings, { size: 18 }), _jsx("span", { children: "Display Controls" })] }), _jsxs("div", { className: "control-section", children: [_jsx("h3", { children: "Display Settings" }), _jsxs("div", { className: "control-group", children: [_jsx("label", { children: "Display Size:" }), _jsxs("select", { value: `${width}x${height}`, onChange: (e) => {
+                                    const [w, h] = e.target.value.split('x').map(Number);
+                                    handleDimensionsChange(w, h);
+                                }, children: [_jsx("option", { value: "380x420", children: "380x420 (Portrait)" }), _jsx("option", { value: "420x380", children: "420x380 (Landscape)" }), _jsx("option", { value: "480x320", children: "480x320 (Landscape)" }), _jsx("option", { value: "320x480", children: "320x480 (Portrait)" })] })] }), _jsxs("div", { className: "control-group", children: [_jsx("label", { children: "Rotation:" }), _jsx("div", { className: "rotation-buttons", children: [0, 1, 2, 3].map(rot => (_jsxs("button", { className: `btn-rotation ${rotation === rot ? 'active' : ''}`, onClick: () => handleRotationChange(rot), children: [_jsx(RotateCw, { size: 16 }), rot * 90, "\u00B0"] }, rot))) })] }), _jsxs("div", { className: "control-group", children: [_jsx("label", { children: "Background Color:" }), _jsxs("div", { className: "color-input-group", children: [_jsx("input", { type: "color", value: backgroundColor, onChange: (e) => setBackgroundColor(e.target.value), className: "color-input" }), _jsx("input", { type: "text", value: backgroundColor, onChange: (e) => setBackgroundColor(e.target.value), className: "color-text", placeholder: "#000000" })] })] })] }), _jsxs("div", { className: "control-section", children: [_jsx("h3", { children: "Debug Options" }), _jsx("div", { className: "control-group", children: _jsxs("label", { className: "checkbox-label", children: [_jsx("input", { type: "checkbox", checked: debugMode, onChange: (e) => setDebugMode(e.target.checked) }), _jsxs("span", { className: "checkbox-text", children: [debugMode ? _jsx(Eye, { size: 16 }) : _jsx(EyeOff, { size: 16 }), "Debug Mode"] })] }) }), _jsx("div", { className: "control-group", children: _jsxs("label", { className: "checkbox-label", children: [_jsx("input", { type: "checkbox", checked: showTouchZones, onChange: (e) => setShowTouchZones(e.target.checked) }), _jsxs("span", { className: "checkbox-text", children: [_jsx(Monitor, { size: 16 }), "Show Touch Zones"] })] }) }), _jsxs("div", { className: "control-group", children: [_jsx("label", { children: "Animation Speed:" }), _jsx("input", { type: "range", min: "0.1", max: "3", step: "0.1", value: animationSpeed, onChange: (e) => setAnimationSpeed(Number(e.target.value)), className: "range-input" }), _jsxs("span", { className: "range-value", children: [animationSpeed, "x"] })] })] }), _jsxs("div", { className: "control-section", children: [_jsx("h3", { children: "Display Stats" }), _jsxs("div", { className: "stats-grid", children: [_jsxs("div", { className: "stat-item", children: [_jsx("span", { className: "stat-label", children: "Elements:" }), _jsx("span", { className: "stat-value", children: elements.length })] }), _jsxs("div", { className: "stat-item", children: [_jsx("span", { className: "stat-label", children: "Touch Zones:" }), _jsx("span", { className: "stat-value", children: touchZones.length })] }), _jsxs("div", { className: "stat-item", children: [_jsx("span", { className: "stat-label", children: "Resolution:" }), _jsxs("span", { className: "stat-value", children: [width, "\u00D7", height] })] }), _jsxs("div", { className: "stat-item", children: [_jsx("span", { className: "stat-label", children: "Aspect Ratio:" }), _jsx("span", { className: "stat-value", children: (width / height).toFixed(2) })] })] })] })] }));
+};
