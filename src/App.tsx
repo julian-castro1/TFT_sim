@@ -1,13 +1,10 @@
-import React from 'react'
 import { DisplayCanvas } from './components/DisplayCanvas'
 import { CodeEditor } from './components/CodeEditor'
 import { ControlPanel } from './components/ControlPanel'
 import { TouchZoneOverlay } from './components/TouchZoneOverlay'
-import { useDisplayStore } from './stores/displayStore'
 import './App.css'
 
 function App() {
-  const { debugMode } = useDisplayStore()
 
   return (
     <div className="app">
@@ -24,7 +21,7 @@ function App() {
         <div className="display-panel">
           <div className="display-container">
             <DisplayCanvas />
-            {debugMode && <TouchZoneOverlay />}
+            <TouchZoneOverlay />
           </div>
           <ControlPanel />
         </div>

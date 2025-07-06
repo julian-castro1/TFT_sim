@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useCallback } from 'react'
 import { useDisplayStore } from '../stores/displayStore'
-import { useCodeStore } from '../stores/codeStore'
 import { renderDisplay } from '../renderers/CanvasRenderer'
 import { handleCanvasClick } from '../utils/interactionUtils'
 import './DisplayCanvas.css'
@@ -16,7 +15,6 @@ export const DisplayCanvas: React.FC = () => {
     debugMode,
     currentScreen
   } = useDisplayStore()
-  const { parsedDisplay } = useCodeStore()
   
   // Handle canvas click/touch
   const handleClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -24,13 +22,22 @@ export const DisplayCanvas: React.FC = () => {
     if (!canvas) return
     
     const rect = canvas.getBoundingClientRect()
+    
+    // Calculate the click position relative to the canvas
+    const canvasX = event.clientX - rect.left
+    const canvasY = event.clientY - rect.top
+    
+    // Convert to canvas coordinates (account for any scaling)
     const scaleX = canvas.width / rect.width
     const scaleY = canvas.height / rect.height
     
-    const x = (event.clientX - rect.left) * scaleX
-    const y = (event.clientY - rect.top) * scaleY
+    const x = canvasX * scaleX
+    const y = canvasY * scaleY
     
-    handleCanvasClick(x, y, touchZones)
+    // Ensure coordinates are within bounds
+    if (x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height) {
+      handleCanvasClick(x, y, touchZones)
+    }
   }, [touchZones])
   
   // Render display when state changes

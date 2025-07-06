@@ -85,7 +85,7 @@ void handleTouch() {
   }
 }`
 
-export const useCodeStore = create<CodeStore>((set, get) => ({
+export const useCodeStore = create<CodeStore>((set) => ({
   // Initial state
   code: DEFAULT_SAMPLE_CODE,
   parsedDisplay: null,
